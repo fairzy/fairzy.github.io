@@ -128,7 +128,7 @@ Figure1.5 A small blue CALayer nested inside a white UIView
 * 你可能想写一个跨平台的在mac os也能运行的代码。
 * 你可能需要用到CALyer的多个子类（参考第6章，“定制的Layer”）并且根本不需要创建UIView的子类来托管他们。
 * 你可能再做一些对性能要求非常高的的工作，即使维护UIView的对象这样微不足道的工作都会产生可以测量的性能影响（尽管在那种情况下，你可能需要用OpenGL来绘制）。
-	But these cases are rare, and in general, layer-backed views are a lot easier to work with than hosted layers.
+
 但是呢，这些情况大体来说比较少见，基于layer的view对于单独的layer来说，减少了很多的工作量。#Summary（小结）
 	This chapter explored the layer tree, a hierarchy of CALayer objects that exists in parallel beneath the UIView hierarchy that forms the iOS interface. We also created our own CALayer and added it to the layer tree as an experiment.
 这一章我们探索了layer树，一个与组成iOS界面的UIView层级结构平行的CALyer对象的层级结构，我们也创建了我们自己的layer并且把它添加到到layer树中了。
