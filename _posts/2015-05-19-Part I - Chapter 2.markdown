@@ -10,15 +10,21 @@ categories: Core Animation
 
 ***
 
-Chapter 1, “The Layer Tree,” introduced the CALayer class and created a simple layer with a blue background. Background colors are all very well, but layers would be rather boring if all they could display was a flat color. A CALayer can actually contain a picture of anything you like. This chapter explores the backing image of CALayer.
+	Chapter 1, “The Layer Tree,” introduced the CALayer class and created a simple layer with a blue background. Background colors are all very well, but layers would be rather boring if all they could display was a flat color. A CALayer can actually contain a picture of anything you like. This chapter explores the backing image of CALayer.
+
+在第1章：Layer树中，我们介绍了`CALayer`类，并且创建了一个简单地蓝色背景的layer，背景颜色是挺不错的，但是如果layer只能显示纯颜色，就太无聊了，一个CALayer其实可以包含任何你喜欢的图片，这一章我们将会看一下CALyer的底层图片(backing image)。
 
 #The contents Image
 
-CALayer has a property called contents. This property’s type is defined as id, implying that it can be any kind of object. This is true—in the sense that you can assign any object you like to the contents property and your app will still compile—however, in practice, if you supply anything other than a CGImage, then your layer will be blank.
+	CALayer has a property called contents. This property’s type is defined as id, implying that it can be any kind of object. This is true—in the sense that you can assign any object you like to the contents property and your app will still compile—however, in practice, if you supply anything other than a CGImage, then your layer will be blank.
 This quirk of the contents property is due to Core Animation’s Mac OS heritage. The reason that contents is defined as an id is so that on Mac OS, you can assign either a CGImage or an NSImage to the property and it will work automatically. If you try to assign a UIImage on iOS, however, you’ll just get a blank layer. This is a common cause of confusion for iOS developers who are new to Core Animation.
 
+CALayer由一个property叫做contents，这个属性是id类型的，暗示了你可以把任何对象赋值给它。如果你给它复制一个任何类型的对象，编译可能会通过，但是在实际运行中，如果你赋值了不是CGImage对象，你将会得到空白的layer，这件怪事的主要原因是，跟Core Aniamtion的Mac OS平台有关，把它定义为id类型，在Mac OS上，你就可以给它赋值NSImage，在iOS上，给它赋值CGImage，赋值任何这两种类型都可以，在iOS平台上赋值一个UIImage会得到空白的layer，这个问题经常引起iOS新手程序员的困惑。
+
 The headaches don’t stop there, though. The type you actually need to supply is a CGImageRef, which is a pointer to a CGImage struct. UIImage has a CGImage property that returns the underlying CGImageRef. If you try to assign that to the CALayer contents property directly, though, it won’t compile because CGImageRef is not really a Cocoa object; it’s a Core Foundation type.Although Core Foundation types behave like Cocoa objects at runtime (known as toll-free bridging), they are not type compatible with id unless you use a bridged cast. To assign the image of a layer, you actually need to do the following:
-	layer.contents = (__bridge id)image.CGImage;`
+	
+	layer.contents = (__bridge id)image.CGImage;
+	
 If you are not using ARC (Automatic Reference Counting), you do not need to include the
 __bridge part, but why are you not using ARC?!
 Let’s modify the project we created in Chapter 1 to display an image rather than a background color. We don’t need the additional hosted layer any more now that we’ve established that it’s possible to create layers programmatically, so we’ll just set the image directly as the contents of the backing layer of our layerView.
