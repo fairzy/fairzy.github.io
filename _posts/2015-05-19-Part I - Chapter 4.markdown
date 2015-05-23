@@ -278,6 +278,7 @@ The really cool feature of CALayer masking is that you are not limited to using 
 ##Scaling Filters
 
 The final topic we cover in this chapter is the effect of the minificationFilter and magnificationFilter properties. Generally on iOS, when you display images, you should try to display them at the correct size (that is, with a 1:1 correlation between the pixels in the image and the pixels onscreen). The reasons for this are as follows:
+
 * It provides the best possible quality, because the pixels aren’t stretched or resampled. 
 * It makes the best use of RAM, because you aren’t storing more pixels than needed.
 * It yields the best performance, because the GPU doesn’t have to work as hard.
