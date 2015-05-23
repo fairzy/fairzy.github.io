@@ -228,6 +228,7 @@ Figure4.11 UsingshadowPathtocastshadowswitharbitraryshapes
 For something like a rectangle or circle, creating a CGPath manually is fairly straight- forward. For a more complex shape like a rounded rectangle, you’ll probably find it easier to use the UIBezierPath class, which is an Objective-C wrapper around CGPath provided by UIKit.
 
 <br/>
+
 ##Layer Masking
 
 Using the masksToBounds property, we know that it is possible to clip a layer’s contents to its bounds, and using the cornerRadius property, we can even give it rounded corners. But sometimes you will want to represent content that is not rectangular or even rounded-rectangular in shape. For example, you might want to create a star-shaped photo frame around an image, or you might want the edges of some scrolling text to fade gracefully into the background instead of clipping to a sharp edge.
@@ -273,6 +274,7 @@ Figure4.13 OurUIImageView,afterthemasklayerhasbeenapplied
 The really cool feature of CALayer masking is that you are not limited to using static images for your masks. Anything that can be composed out of layers can be used as the mask property, which means that your masks can be created dynamically using code, and even animated in real time.
 
 <br/>
+
 ##Scaling Filters
 
 The final topic we cover in this chapter is the effect of the minificationFilter and magnificationFilter properties. Generally on iOS, when you display images, you should try to display them at the correct size (that is, with a 1:1 correlation between the pixels in the image and the pixels onscreen). The reasons for this are as follows:
