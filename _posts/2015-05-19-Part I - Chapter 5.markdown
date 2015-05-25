@@ -479,60 +479,124 @@ That has the effect of rotating the camera (or rotating the entire scene relativ
 Figure 5.21 The cube, displayed corner-on
 
 ###Light and Shadow
-It definitely looks more like a cube now, but it’s difficult to make out the joins between the faces. Core Animation can display layers in 3D, but it has no concept of lighting. If you want to make your cube look more realistic, you’ll have to apply your own shading effects. You can do this by adjusting the different view background colors or by using images with lighting effects pre-applied to them.
-If you need to create dynamic lighting effects, you can do so by overlaying each view with a translucent black shadow layer with varying alpha based on the view orientation. To calculate the opacity of the shadow layer, you need to get the normal vector for each face (a vector that points perpendicular to the surface) and then calculate the cross product between that vector and the vector from an imaginary light source. The cross product gives you the angle between the light source and the layer, which indicates the extent to which it should be illuminated.
-An implementation of this idea is shown in Listing 5.10. We’ve used the GLKit framework to do the vector calculations (you’ll need to include this framework in your project to run the code). The CATransform3D for each face is cast to a GLKMatrix4 using some pointer trickery, and then the 3×3 rotation matrix is extracted using the GLKMatrix4GetMatrix3 function. The rotation matrix is the part of the transform that specifies the layer’s orientation, and we can use it to calculate the normal vector.Figure 5.22 shows the result. Try tweaking the LIGHT_DIRECTION vector and AMBIENT_LIGHT value to alter the lighting effect.
-####Listing 5.10 Applying Dynamic Lighting Effects to the Cube Faces	#import "ViewController.h" 
+
+It definitely looks more like a cube now, but it’s difficult to make out the joins between the faces. Core Animation can display layers in 3D, but it has no concept of lighting. If you want to make your cube look more realistic, you’ll have to apply your own shading effects. You can do this by adjusting the different view background colors or by using images with lighting effects pre-applied to them.
+
+If you need to create dynamic lighting effects, you can do so by overlaying each view with a translucent black shadow layer with varying alpha based on the view orientation. To calculate the opacity of the shadow layer, you need to get the normal vector for each face (a vector that points perpendicular to the surface) and then calculate the cross product between that vector and the vector from an imaginary light source. The cross product gives you the angle between the light source and the layer, which indicates the extent to which it should be illuminated.
+
+An implementation of this idea is shown in Listing 5.10. We’ve used the GLKit framework to do the vector calculations (you’ll need to include this framework in your project to run the code). The CATransform3D for each face is cast to a GLKMatrix4 using some pointer trickery, and then the 3×3 rotation matrix is extracted using the GLKMatrix4GetMatrix3 function. The rotation matrix is the part of the transform that specifies the layer’s orientation, and we can use it to calculate the normal vector.
+
+Figure 5.22 shows the result. Try tweaking the LIGHT_DIRECTION vector and AMBIENT_LIGHT value to alter the lighting effect.
+
+####Listing 5.10 Applying Dynamic Lighting Effects to the Cube Faces
+
+	#import "ViewController.h" 
 	#import <QuartzCore/QuartzCore.h> 
 	#import <GLKit/GLKit.h>
-		#define LIGHT_DIRECTION 0, 1, -0.5 
-	#define AMBIENT_LIGHT 0.5	@interface ViewController ()	@property (nonatomic, weak) IBOutlet UIView *containerView;	@property (nonatomic, strong) IBOutletCollection(UIView) NSArray *faces; 
+	
+	#define LIGHT_DIRECTION 0, 1, -0.5 
+	#define AMBIENT_LIGHT 0.5
+	@interface ViewController ()
+	@property (nonatomic, weak) IBOutlet UIView *containerView;
+	@property (nonatomic, strong) IBOutletCollection(UIView) NSArray *faces; 
 	@end
-		@implementation ViewController	- (void)applyLightingToFace:(CALayer *)face 
-	{		//add lighting layer		CALayer *layer = [CALayer layer]; 
-		layer.frame = face.bounds;		[face addSublayer:layer];		//convert the face transform to matrix		//(GLKMatrix4 has the same structure as CATransform3D) 
-		CATransform3D transform = face.transform;		GLKMatrix4 matrix4 = *(GLKMatrix4 *)&transform; 
-		GLKMatrix3 matrix3 = GLKMatrix4GetMatrix3(matrix4);		//get face normal		GLKVector3 normal = GLKVector3Make(0, 0, 1);		normal = GLKMatrix3MultiplyVector3(matrix3, normal); 
-		normal = GLKVector3Normalize(normal);		//get dot product with light direction		GLKVector3 light = GLKVector3Normalize(GLKVector3Make(LIGHT_DIRECTION)); 
+	
+	@implementation ViewController
+	- (void)applyLightingToFace:(CALayer *)face 
+	{
+		//add lighting layer
+		CALayer *layer = [CALayer layer]; 
+		layer.frame = face.bounds;
+		[face addSublayer:layer];
+		//convert the face transform to matrix
+		//(GLKMatrix4 has the same structure as CATransform3D) 
+		CATransform3D transform = face.transform;
+		GLKMatrix4 matrix4 = *(GLKMatrix4 *)&transform; 
+		GLKMatrix3 matrix3 = GLKMatrix4GetMatrix3(matrix4);
+		//get face normal
+		GLKVector3 normal = GLKVector3Make(0, 0, 1);
+		normal = GLKMatrix3MultiplyVector3(matrix3, normal); 
+		normal = GLKVector3Normalize(normal);
+		//get dot product with light direction
+		GLKVector3 light = GLKVector3Normalize(GLKVector3Make(LIGHT_DIRECTION)); 
 		float dotProduct = GLKVector3DotProduct(light, normal);
-		//set lighting layer opacity		CGFloat shadow = 1 + dotProduct - AMBIENT_LIGHT;		UIColor *color = [UIColor colorWithWhite:0 alpha:shadow]; 
-		layer.backgroundColor = color.CGColor;	}	- (void)addFace:(NSInteger)index withTransform:(CATransform3D)transform 
-	{		//get the face view and add it to the container		UIView *face = self.faces[index]; 
-		[self.containerView addSubview:face];		//center the face view within the container		CGSize containerSize = self.containerView.bounds.size; 
-		face.center = CGPointMake(containerSize.width / 2.0,		containerSize.height / 2.0); 
-		face.layer.transform = transform;		//apply lighting		[self applyLightingToFace:face.layer]; }		- (void)viewDidLoad {		[super viewDidLoad];		//set up the container sublayer transform		CATransform3D perspective = CATransform3DIdentity; 
-		perspective.m34 = -1.0 / 500.0;		perspective = CATransform3DRotate(perspective, -M_PI_4, 1, 0, 0); 
+		//set lighting layer opacity
+		CGFloat shadow = 1 + dotProduct - AMBIENT_LIGHT;
+		UIColor *color = [UIColor colorWithWhite:0 alpha:shadow]; 
+		layer.backgroundColor = color.CGColor;
+	}
+	- (void)addFace:(NSInteger)index withTransform:(CATransform3D)transform 
+	{
+		//get the face view and add it to the container
+		UIView *face = self.faces[index]; 
+		[self.containerView addSubview:face];
+		//center the face view within the container
+		CGSize containerSize = self.containerView.bounds.size; 
+		face.center = CGPointMake(containerSize.width / 2.0,
+		containerSize.height / 2.0); 
+		face.layer.transform = transform;
+		//apply lighting
+		[self applyLightingToFace:face.layer]; }
+		- (void)viewDidLoad {
+		[super viewDidLoad];
+		//set up the container sublayer transform
+		CATransform3D perspective = CATransform3DIdentity; 
+		perspective.m34 = -1.0 / 500.0;
+		perspective = CATransform3DRotate(perspective, -M_PI_4, 1, 0, 0); 
 		perspective = CATransform3DRotate(perspective, -M_PI_4, 0, 1, 0);
-		self.containerView.layer.sublayerTransform = perspective;		//add cube face 1		CATransform3D transform = CATransform3DMakeTranslation(0, 0, 100); 
-		[self addFace:0 withTransform:transform];		//add cube face 2		transform = CATransform3DMakeTranslation(100, 0, 0); 
+		self.containerView.layer.sublayerTransform = perspective;
+		//add cube face 1
+		CATransform3D transform = CATransform3DMakeTranslation(0, 0, 100); 
+		[self addFace:0 withTransform:transform];
+		//add cube face 2
+		transform = CATransform3DMakeTranslation(100, 0, 0); 
 		transform = CATransform3DRotate(transform, M_PI_2, 0, 1, 0); 
-		[self addFace:1 withTransform:transform];		//add cube face 3		transform = CATransform3DMakeTranslation(0, -100, 0);
-			transform = CATransform3DRotate(transform, M_PI_2, 1, 0, 0); 
-		[self addFace:2 withTransform:transform];		//add cube face 4		transform = CATransform3DMakeTranslation(0, 100, 0); 
+		[self addFace:1 withTransform:transform];
+		//add cube face 3
+		transform = CATransform3DMakeTranslation(0, -100, 0);
+	
+		transform = CATransform3DRotate(transform, M_PI_2, 1, 0, 0); 
+		[self addFace:2 withTransform:transform];
+		//add cube face 4
+		transform = CATransform3DMakeTranslation(0, 100, 0); 
 		transform = CATransform3DRotate(transform, -M_PI_2, 1, 0, 0); 
-		[self addFace:3 withTransform:transform];		//add cube face 5		transform = CATransform3DMakeTranslation(-100, 0, 0); 
+		[self addFace:3 withTransform:transform];
+		//add cube face 5
+		transform = CATransform3DMakeTranslation(-100, 0, 0); 
 		transform = CATransform3DRotate(transform, -M_PI_2, 0, 1, 0); 
-		[self addFace:4 withTransform:transform];		//add cube face 6		transform = CATransform3DMakeTranslation(0, 0, -100); 
+		[self addFace:4 withTransform:transform];
+		//add cube face 6
+		transform = CATransform3DMakeTranslation(0, 0, -100); 
 		transform = CATransform3DRotate(transform, M_PI, 0, 1, 0); 
-		[self addFace:5 withTransform:transform];	}	@end
+		[self addFace:5 withTransform:transform];
+	}
+	@end
 
 ![Figure 5.22 The cube, now with dynamically calculated lighting](http://ww4.sinaimg.cn/mw690/6cdd1b93gw1esgcowtqshj20gc08bmxn.jpg)
 
 Figure 5.22 The cube, now with dynamically calculated lighting
 
 ###Touch Events
-You may have also noticed that we can now see the button on the third face. If you press it, nothing happens. Why is that?
-It’s not because iOS cannot correctly transform the touch events to match the button position in 3D; it’s actually quite capable of doing that. The problem is the view order. As we mentioned briefly in Chapter 3, touch events are processed according to the order of views within their superview, not their Z-position in 3D space. When we added our cube face views, we added them in numeric order, so faces 4, 5, and 6 are in front of face 3 in the view/layer order.
-Even though we can’t see faces 4, 5, and 6 (because they are obscured by faces 1, 2, and 3), iOS still gives them first dibs on touch events. When we try to tap the button on face 3, face 5 or 6 (depending on where we tap) is intercepting the touch event, just as it would if we had placed it in front of the button in a normal 2D layout.
-You might think that setting doubleSided to NO might help here, as it would render the rearward facing views invisible, but unfortunately that doesn’t help; views that are hidden because they are facing away from the camera will still intercept touch events (unlike views that are hidden using the hidden property, or by setting their alpha to zero, which don’t), so disabling double-sided rendering won’t help with this issue (although it might be worth doing anyway for performance reasons).
-There are a couple of solutions to this: We could set userInteractionEnabled to NO on all of our cube face views except face 3 so that they don’t receive touches. Or we could simply add face number 3 to the view hierarchy after face number 6 in our program. Either way, we will then be able to press the button (see Figure 5.23).
-![Figure 5.23 Now the background views aren’t blocking the button, we can press it.](http://ww2.sinaimg.cn/mw690/6cdd1b93gw1esgcq3jb0dj20gk0883z5.jpg)
+
+You may have also noticed that we can now see the button on the third face. If you press it, nothing happens. Why is that?
+
+It’s not because iOS cannot correctly transform the touch events to match the button position in 3D; it’s actually quite capable of doing that. The problem is the view order. As we mentioned briefly in Chapter 3, touch events are processed according to the order of views within their superview, not their Z-position in 3D space. When we added our cube face views, we added them in numeric order, so faces 4, 5, and 6 are in front of face 3 in the view/layer order.
+
+Even though we can’t see faces 4, 5, and 6 (because they are obscured by faces 1, 2, and 3), iOS still gives them first dibs on touch events. When we try to tap the button on face 3, face 5 or 6 (depending on where we tap) is intercepting the touch event, just as it would if we had placed it in front of the button in a normal 2D layout.
+
+You might think that setting doubleSided to NO might help here, as it would render the rearward facing views invisible, but unfortunately that doesn’t help; views that are hidden because they are facing away from the camera will still intercept touch events (unlike views that are hidden using the hidden property, or by setting their alpha to zero, which don’t), so disabling double-sided rendering won’t help with this issue (although it might be worth doing anyway for performance reasons).
+
+There are a couple of solutions to this: We could set userInteractionEnabled to NO on all of our cube face views except face 3 so that they don’t receive touches. Or we could simply add face number 3 to the view hierarchy after face number 6 in our program. Either way, we will then be able to press the button (see Figure 5.23).
+
+![Figure 5.23 Now the background views aren’t blocking the button, we can press it.](http://ww2.sinaimg.cn/mw690/6cdd1b93gw1esgcq3jb0dj20gk0883z5.jpg)
 
 Figure 5.23 Now the background views aren’t blocking the button, we can press it.
 
 <br/>
 
 ##Summary
-This chapter covered 2D and 3D transforms. You learned a bit about matrix math, and how to create 3D scenes with Core Animation. You saw what the back of a layer looks like and learned that you can’t peer around objects in a flat image. Finally, this chapter demonstrated that when it comes to handling touch events, the order of views or layers in the hierarchy is more significant than their apparent order onscreen.
-Chapter 6 takes a look at the specialized CALayer subclasses provided by Core Animation and their various capabilities.
+
+This chapter covered 2D and 3D transforms. You learned a bit about matrix math, and how to create 3D scenes with Core Animation. You saw what the back of a layer looks like and learned that you can’t peer around objects in a flat image. Finally, this chapter demonstrated that when it comes to handling touch events, the order of views or layers in the hierarchy is more significant than their apparent order onscreen.
+
+Chapter 6 takes a look at the specialized CALayer subclasses provided by Core Animation and their various capabilities.
 
