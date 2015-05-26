@@ -61,7 +61,8 @@ Listing 6.1 shows the code for a simple stick figure drawing, rendered using a s
         [path moveToPoint:CGPointMake(175, 100)];
         [path addArcWithCenter:CGPointMake(150, 100) 
                         radius:25
-                    startAngle:0 endAngle:2*M_PI
+                    startAngle:0 
+                      endAngle:2*M_PI
                      clockwise:YES];
         [path moveToPoint:CGPointMake(150, 125)];
         [path addLineToPoint:CGPointMake(150, 175)]; 
@@ -90,6 +91,7 @@ Figure 6.1 A simple stick figure displayed using CAShapeLayer
 ###Rounded Corners, Redux
 
 Chapter 2 mentioned that CAShapeLayer provides an alternative way to create a view with rounded corners, as opposed to using the CALayer cornerRadius property. Although using a CAShapeLayer is a bit more work, it has the advantage that it allows us to specify the radius of each corner independently.
+
 We could create a rounded rectangle path manually using individual straight lines and arcs, but UIBezierPath actually has some convenience constructors for creating rounded rectangles automatically. The following code snippet produces a path with three rounded corners and one sharp:
 
     //define path parameters
@@ -97,7 +99,9 @@ We could create a rounded rectangle path manually using individual straight line
     CGSize radii = CGSizeMake(20, 20); 
     UIRectCorner corners = UIRectCornerTopRight | UIRectCornerBottomRight | UIRectCornerBottomLeft;
     //create path
-    UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:rect byRoundingCorners:corners cornerRadii:radii];
+    UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:rect 
+                                               byRoundingCorners:corners 
+                                                     cornerRadii:radii];
 
 We can use a CAShapeLayer with this path to create a view with mixed sharp and rounded corners. If we want to clip the view’s contents to this shape, we can use our CAShapeLayer as the mask property of the view’s backing layer instead of adding it as a sublayer. (See Chapter 4, “Visual Effects,” for a full explanation of layer masks.)
 
@@ -136,7 +140,8 @@ Let’s try displaying some text using a CATextLayer. Listing 6.2 shows the code
         CFStringRef fontName = (__bridge CFStringRef)font.fontName; 
         CGFontRef fontRef = CGFontCreateWithFontName(fontName); 
         textLayer.font = fontRef;
-        textLayer.fontSize = font.pointSize; CGFontRelease(fontRef);
+        textLayer.fontSize = font.pointSize; 
+        CGFontRelease(fontRef);
         //choose some text
         NSString *text = @"Lorem ipsum dolor sit amet, consectetur adipiscing \ 
         elit. Quisque massa arcu, eleifend vel varius in, facilisis pulvinar \ 
@@ -269,13 +274,17 @@ Listing 6.4 shows the code for a UILabel subclass called LayerLabel that draws i
 
     - (void)setUp {
         //set defaults from UILabel settings
-        self.text = self.text; self.textColor = self.textColor;
+        self.text = self.text; 
+        self.textColor = self.textColor;
          self.font = self.font;
+
         //we should really derive these from the UILabel settings too 
         //but that's complicated, so for now we'll just hard-code them 
         [self textLayer].alignmentMode = kCAAlignmentJustified;
 
-        [self textLayer].wrapped = YES; [self.layer display];
+        [self textLayer].wrapped = YES; 
+        
+        [self.layer display];
     }
 
     - (id)initWithFrame:(CGRect)frame 
