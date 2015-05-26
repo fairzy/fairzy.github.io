@@ -20,12 +20,22 @@ Up to this point, we have been working with the CALayer class, and we have seen 
 ##CAShapeLayer
 
 In Chapter 4, “Visual Effects,” you learned how to use CGPath to create arbitrarily shaped shadows without using images. It would be neat if we could create arbitrarily shaped layers in the same way.
+
+在第4章，“Visual Effects”中，我们学习了如何使用CGPath不使用图片来创建任意形状的阴影。如果我们能用相同方式创建任意形状的layer就好了。
+
 CAShapeLayer is a layer subclass that draws itself using vector graphics instead of a bitmap image. You specify attributes such as color and line thickness, define the desired shape using a CGPath, and CAShapeLayer renders it automatically. Of course, you could use Core Graphics to draw a path directly into the contents of an ordinary CALayer (as in Chapter 2, “The Backing Image”), but there are several advantages to using CAShapeLayer instead:
 
-* It’s fast—CAShapeLayer uses hardware-accelerated drawing and is much faster than using Core Graphics to draw an image.
-* It’smemoryefficient—ACAShapeLayerdoesnothavetocreateabackingimage like an ordinary CALayer does, so no matter how large it gets, it won’t consume much memory.
-* Itdoesn'tgetclippedtothelayerbounds—ACAShapeLayercanhappilydraw outside of its bounds. Your path will not get clipped like it does when you draw into a regular CALayer using Core Graphics (as you saw in Chapter 2).
-* There'snopixelation—WhenyoutransformaCAShapeLayerbyscalingitupor moving it closer to the camera with a 3D perspective transform, it does not become pixelated like an ordinary layer’s backing image would.
+CAShapeLayer是一个子类，它使用图形向量而不是图片来绘制内容。你指定颜色和线条宽度，用CGPath定义想要的形状，CAShapeLayer就可以自动渲染这些内容。当然你月可以用Core Graphics来直接把内容绘制到一个普通的CALayer上（就像第二章：“The Backing Image”中展示的），但是用CAShapeLayer有几种好处：
+
+* It’s fast — CAShapeLayer uses hardware-accelerated drawing and is much faster than using Core Graphics to draw an image.
+* It’s memory efficient — A CAShapeLayer does not have to create a backing image like an ordinary CALayer does, so no matter how large it gets, it won’t consume much memory.
+* It doesn't get clipped to the layer bounds — A CAShapeLayer can happily draw outside of its bounds. Your path will not get clipped like it does when you draw into a regular CALayer using Core Graphics (as you saw in Chapter 2).
+* There's no pixelation — When you transform a CAShapeLayer by scaling it up or moving it closer to the camera with a 3D perspective transform, it does not become pixelated like an ordinary layer’s backing image would.
+
+* CAShapeLayer更快 - 它使用硬件加速来绘制内容，这样就比用Core Graphics绘制图片快多了。
+* 更节省内存 - 一个CAShapeLayer不像普通CALayer一样创建backing image，所以不管多大尺寸，它都不会消耗太多内存。
+* 不像普通layer一样，会被layer的边界裁剪，（就像第二章看到的）
+* 不会模糊，当你把一个CAShapeLayer放大或者把它用3D透视变换像camera移动时，他不会像使用image作为backing layer的普通layer一样变得像素模糊。
 
 ###Creating a CGPath
 
